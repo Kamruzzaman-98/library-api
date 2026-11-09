@@ -9,4 +9,4 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/settings', [SettingController::class, 'index']);
-Route::post('/admin/settings', [SettingController::class, 'update']);
+Route::post('/settings', [SettingController::class, 'update']);

@@ -16,4 +16,24 @@ class SettingController extends Controller
             'data'   => $settings
         ], 200);
     }
+
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'settings' => 'required|array',
+        ]);
+
+        foreach ($request->settings as $key => $value) {
+            Setting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $value]
+            );
+        }
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Information updated successfully!'
+        ], 200);
+    }
 }
