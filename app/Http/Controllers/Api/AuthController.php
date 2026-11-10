@@ -40,4 +40,36 @@ class AuthController extends Controller
             'user'    => $user,
         ], 201);
     }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['Invalid credentials.'],
+            ]);
+        }
+
+        if ($user->status !== 'active') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Your account has been suspended. Please contact the library administration.',
+            ], 403);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Login successful!',
+            'token'   => $token,
+            'user'    => $user,
+        ], 200);
+    }
 }
