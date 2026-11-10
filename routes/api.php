@@ -10,9 +10,12 @@ use Illuminate\Support\Facades\Route;
 // })->middleware('auth:sanctum');
 
 Route::get('/settings', [SettingController::class, 'index']);
-Route::post('/settings', [SettingController::class, 'update']);
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 
-Route::middleware('auth:sanctum')->group(function () {});
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/settings', [SettingController::class, 'update']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
