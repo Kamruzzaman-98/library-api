@@ -14,4 +14,22 @@ class CategoryController extends Controller
         $categories = Category::withCount('books')->latest()->get();
         return response()->json(['status' => 'success', 'data' => $categories], 200);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'        => 'required|string|max:100|unique:categories,name',
+            'description' => 'nullable|string',
+        ]);
+
+        $validated['slug'] = Str::slug($validated['name']);
+
+        $category = Category::create($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Category added successfully!',
+            'data'    => $category,
+        ], 201);
+    }
 }
