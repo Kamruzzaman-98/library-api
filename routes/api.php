@@ -25,4 +25,5 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/settings', [SettingController::class, 'update']);
     Route::post('/categories', [CategoryController::class, 'store']);
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
 });
