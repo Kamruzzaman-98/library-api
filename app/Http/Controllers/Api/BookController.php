@@ -38,6 +38,14 @@ class BookController extends Controller
         ], 200);
     }
 
+    public function show(Book $book)
+    {
+        return response()->json([
+            'status' => 'success',
+            'data'   => $book->load('category'),
+        ], 200);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
