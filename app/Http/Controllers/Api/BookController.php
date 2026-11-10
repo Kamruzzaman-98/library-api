@@ -37,4 +37,34 @@ class BookController extends Controller
             'data'   => $books,
         ], 200);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'category_id'  => 'required|exists:categories,id',
+            'title'        => 'required|string|max:255',
+            'author'       => 'required|string|max:255',
+            'publisher'    => 'nullable|string|max:255',
+            'isbn'         => 'nullable|string|unique:books,isbn',
+            'total_copies' => 'required|integer|min:1',
+            'shelf_no'     => 'nullable|string|max:50',
+            'description'  => 'nullable|string',
+            'cover_image'  => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $validated['available_copies'] = $validated['total_copies'];
+
+        if ($request->hasFile('cover_image')) {
+            $path = $request->file('cover_image')->store('books', 'public');
+            $validated['cover_image'] = Storage::url($path);
+        }
+
+        $book = Book::create($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Book saved successfully!',
+            'data'    => $book,
+        ], 201);
+    }
 }
