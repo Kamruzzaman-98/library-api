@@ -75,4 +75,19 @@ class BookController extends Controller
             'data'    => $book,
         ], 201);
     }
+
+    public function destroy(Book $book)
+    {
+        if ($book->cover_image) {
+            $filePath = str_replace('/storage/', '', $book->cover_image);
+            Storage::disk('public')->delete($filePath);
+        }
+
+        $book->delete();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Book deleted successfully!',
+        ], 200);
+    }
 }
