@@ -31,4 +31,25 @@ class NoticeController extends Controller
             'data'   => $notices,
         ], 200);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title'        => 'required|string|max:255',
+            'content'      => 'required|string',
+            'published_at' => 'nullable|date',
+            'is_active'    => 'boolean',
+        ]);
+
+        $validated['published_at'] = $validated['published_at'] ?? Carbon::today();
+        $validated['is_active'] = $validated['is_active'] ?? true;
+
+        $notice = Notice::create($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'নোটিশ সফলভাবে প্রকাশিত হয়েছে!',
+            'data'    => $notice,
+        ], 201);
+    }
 }
