@@ -52,4 +52,14 @@ class NoticeController extends Controller
             'data'    => $notice,
         ], 201);
     }
+
+    public function destroy(Notice $notice)
+    {
+        $notice->delete();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'নোটিশ মুছে ফেলা হয়েছে!',
+        ], 200);
+    }
 }

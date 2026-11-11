@@ -43,4 +43,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/borrows/reject/{borrowRecord}', [BorrowController::class, 'rejectRequest']);
     Route::get('/notices', [NoticeController::class, 'adminIndex']);
     Route::post('/notices', [NoticeController::class, 'store']);
+    Route::delete('/notices/{notice}', [NoticeController::class, 'destroy']);
 });
