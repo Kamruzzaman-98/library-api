@@ -66,4 +66,23 @@ class DashboardController extends Controller
             'data'   => $members,
         ], 200);
     }
+
+    public function toggleMemberStatus(User $user)
+    {
+        if ($user->role === 'admin') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'অ্যাডমিনের স্ট্যাটাস পরিবর্তন করা যাবে না।',
+            ], 400);
+        }
+
+        $user->status = $user->status === 'active' ? 'blocked' : 'active';
+        $user->save();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => "পাঠকের স্ট্যাটাস সফলভাবে '{$user->status}' করা হয়েছে।",
+            'data'    => $user,
+        ], 200);
+    }
 }
