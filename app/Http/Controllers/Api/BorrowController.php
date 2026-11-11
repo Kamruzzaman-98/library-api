@@ -63,4 +63,20 @@ class BorrowController extends Controller
             'data'   => $records,
         ], 200);
     }
+
+    public function adminBorrows(Request $request)
+    {
+        $query = BorrowRecord::with(['user', 'book'])->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $records = $query->paginate(15);
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $records,
+        ], 200);
+    }
 }
