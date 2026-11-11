@@ -47,4 +47,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::delete('/notices/{notice}', [NoticeController::class, 'destroy']);
 
     Route::get('/admin/stats', [DashboardController::class, 'stats']);
+    Route::get('/admin/members', [DashboardController::class, 'members']);
 });

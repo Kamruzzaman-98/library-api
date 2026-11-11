@@ -45,4 +45,25 @@ class DashboardController extends Controller
             ],
         ], 200);
     }
+
+    public function members(Request $request)
+    {
+        $query = User::where('role', 'reader')->withCount('borrowRecords')->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $members = $query->paginate(15);
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $members,
+        ], 200);
+    }
 }
