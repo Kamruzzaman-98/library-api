@@ -41,4 +41,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/borrows/issue/{borrowRecord}', [BorrowController::class, 'issueBook']);
     Route::post('/borrows/return/{borrowRecord}', [BorrowController::class, 'returnBook']);
     Route::post('/borrows/reject/{borrowRecord}', [BorrowController::class, 'rejectRequest']);
+    Route::get('/notices', [NoticeController::class, 'adminIndex']);
+    Route::post('/notices', [NoticeController::class, 'store']);
 });

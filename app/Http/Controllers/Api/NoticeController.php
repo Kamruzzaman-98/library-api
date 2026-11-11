@@ -21,4 +21,14 @@ class NoticeController extends Controller
             'data'   => $notices,
         ], 200);
     }
+
+    public function adminIndex()
+    {
+        $notices = Notice::latest()->paginate(10);
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $notices,
+        ], 200);
+    }
 }
