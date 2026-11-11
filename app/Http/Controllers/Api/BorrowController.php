@@ -140,4 +140,21 @@ class BorrowController extends Controller
             'message' => 'বইটি সফলভাবে ফেরত গ্রহণ করা হয়েছে!',
         ], 200);
     }
+
+    public function rejectRequest(BorrowRecord $borrowRecord)
+    {
+        if ($borrowRecord->status !== 'pending') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'শুধুমাত্র পেন্ডিং আবেদন বাতিল করা যাবে।',
+            ], 400);
+        }
+
+        $borrowRecord->update(['status' => 'rejected']);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'বইয়ের আবেদনটি বাতিল করা হয়েছে।',
+        ], 200);
+    }
 }

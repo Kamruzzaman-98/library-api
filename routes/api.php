@@ -38,4 +38,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/borrows', [BorrowController::class, 'adminBorrows']);
     Route::post('/borrows/issue/{borrowRecord}', [BorrowController::class, 'issueBook']);
     Route::post('/borrows/return/{borrowRecord}', [BorrowController::class, 'returnBook']);
+    Route::post('/borrows/reject/{borrowRecord}', [BorrowController::class, 'rejectRequest']);
 });
