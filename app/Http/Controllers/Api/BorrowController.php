@@ -50,4 +50,17 @@ class BorrowController extends Controller
             'data'    => $record,
         ], 201);
     }
+
+    public function myBorrows(Request $request)
+    {
+        $records = BorrowRecord::with('book')
+            ->where('user_id', $request->user()->id)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $records,
+        ], 200);
+    }
 }

@@ -25,6 +25,7 @@ Route::get('/books/{book}', [BookController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/borrow-request', [BorrowController::class, 'requestBook']);
+    Route::get('/my-borrows', [BorrowController::class, 'myBorrows']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
