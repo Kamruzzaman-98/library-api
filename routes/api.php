@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\BorrowController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\SettingController;
 use Illuminate\Http\Request;
@@ -44,4 +45,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/manage/notices', [NoticeController::class, 'adminIndex']);
     Route::post('/notices', [NoticeController::class, 'store']);
     Route::delete('/notices/{notice}', [NoticeController::class, 'destroy']);
+
+    Route::get('/admin/stats', [DashboardController::class, 'stats']);
 });
