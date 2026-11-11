@@ -79,4 +79,41 @@ class BorrowController extends Controller
             'data'   => $records,
         ], 200);
     }
+
+    public function issueBook(Request $request, BorrowRecord $borrowRecord)
+    {
+        if ($borrowRecord->status !== 'pending') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'শুধুমাত্র পেন্ডিং রিকোয়েস্ট ইস্যু করা সম্ভব।',
+            ], 400);
+        }
+
+        $request->validate([
+            'days' => 'nullable|integer|min:1|max:30',
+        ]);
+
+        $days = $request->days ?? 14;
+
+        DB::transaction(function () use ($borrowRecord, $days) {
+            $book = Book::lockForUpdate()->find($borrowRecord->book_id);
+
+            if ($book->available_copies < 1) {
+                throw new \Exception('বইটির পর্যাপ্ত কপি অবশিষ্ট নেই!');
+            }
+
+            $book->decrement('available_copies');
+
+            $borrowRecord->update([
+                'status'     => 'issued',
+                'issue_date' => Carbon::now(),
+                'due_date'   => Carbon::now()->addDays($days),
+            ]);
+        });
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'বইটি সফলভাবে ইস্যু করা হয়েছে!',
+        ], 200);
+    }
 }
