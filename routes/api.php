@@ -37,4 +37,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::delete('/books/{book}', [BookController::class, 'destroy']);
     Route::get('/borrows', [BorrowController::class, 'adminBorrows']);
     Route::post('/borrows/issue/{borrowRecord}', [BorrowController::class, 'issueBook']);
+    Route::post('/borrows/return/{borrowRecord}', [BorrowController::class, 'returnBook']);
 });

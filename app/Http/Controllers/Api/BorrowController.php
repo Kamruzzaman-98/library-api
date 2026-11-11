@@ -116,4 +116,28 @@ class BorrowController extends Controller
             'message' => 'বইটি সফলভাবে ইস্যু করা হয়েছে!',
         ], 200);
     }
+
+    public function returnBook(BorrowRecord $borrowRecord)
+    {
+        if ($borrowRecord->status !== 'issued') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'এই বইটি বর্তমানে ইস্যুকৃত অবস্থায় নেই।',
+            ], 400);
+        }
+
+        DB::transaction(function () use ($borrowRecord) {
+            Book::where('id', $borrowRecord->book_id)->increment('available_copies');
+
+            $borrowRecord->update([
+                'status'      => 'returned',
+                'return_date' => Carbon::now(),
+            ]);
+        });
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'বইটি সফলভাবে ফেরত গ্রহণ করা হয়েছে!',
+        ], 200);
+    }
 }
