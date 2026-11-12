@@ -9,6 +9,8 @@ use App\Models\Category;
 use App\Models\Notice;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -22,6 +24,29 @@ class DashboardController extends Controller
         $pendingRequests = BorrowRecord::where('status', 'pending')->count();
         $currentlyIssued = BorrowRecord::where('status', 'issued')->count();
         $totalReturned = BorrowRecord::where('status', 'returned')->count();
+
+        $overdueRecords = BorrowRecord::with(['user', 'book'])
+            ->where('status', 'issued')
+            ->whereDate('due_date', '<', Carbon::today())
+            ->orderBy('due_date', 'asc')
+            ->get();
+
+        $categoryStats = Category::withCount('books')
+            ->having('books_count', '>', 0)
+            ->get(['id', 'name', 'books_count']);
+
+        $monthlyBorrows = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $count = BorrowRecord::whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->count();
+
+            $monthlyBorrows[] = [
+                'month' => $date->format('M Y'),
+                'count' => $count,
+            ];
+        }
 
         $recentActivities = BorrowRecord::with(['user', 'book'])
             ->latest('updated_at')
@@ -40,7 +65,11 @@ class DashboardController extends Controller
                     'pending_requests' => $pendingRequests,
                     'currently_issued' => $currentlyIssued,
                     'total_returned'   => $totalReturned,
+                    'overdue_count'    => $overdueRecords->count(),
                 ],
+                'overdue_records'   => $overdueRecords,
+                'category_stats'    => $categoryStats,
+                'monthly_borrows'   => $monthlyBorrows,
                 'recent_activities' => $recentActivities,
             ],
         ], 200);
