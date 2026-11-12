@@ -48,5 +48,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
     Route::get('/admin/stats', [DashboardController::class, 'stats']);
     Route::get('/admin/members', [DashboardController::class, 'members']);
-    Route::post('admin/members/toggle-status/{user}', [DashboardController::class, 'toggleMemberStatus']);
+    Route::post('/admin/members/toggle-status/{user}', [DashboardController::class, 'toggleMemberStatus']);
 });
