@@ -76,6 +76,42 @@ class BookController extends Controller
         ], 201);
     }
 
+    public function update(Request $request, Book $book)
+    {
+        $validated = $request->validate([
+            'category_id'  => 'required|exists:categories,id',
+            'title'        => 'required|string|max:255',
+            'author'       => 'required|string|max:255',
+            'publisher'    => 'nullable|string|max:255',
+            'isbn'         => 'nullable|string|unique:books,isbn,' . $book->id,
+            'total_copies' => 'required|integer|min:1',
+            'shelf_no'     => 'nullable|string|max:50',
+            'description'  => 'nullable|string',
+            'cover_image'  => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $copyDifference = $validated['total_copies'] - $book->total_copies;
+        $newAvailable = max(0, $book->available_copies + $copyDifference);
+        $validated['available_copies'] = $newAvailable;
+
+        if ($request->hasFile('cover_image')) {
+            if ($book->cover_image) {
+                $oldPath = str_replace('/storage/', '', $book->cover_image);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $path = $request->file('cover_image')->store('books', 'public');
+            $validated['cover_image'] = Storage::url($path);
+        }
+
+        $book->update($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'বইয়ের তথ্য সফলভাবে আপডেট হয়েছে!',
+            'data'    => $book->load('category'),
+        ], 200);
+    }
+
     public function destroy(Book $book)
     {
         if ($book->cover_image) {
