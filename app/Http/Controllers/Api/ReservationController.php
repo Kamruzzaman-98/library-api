@@ -54,4 +54,17 @@ class ReservationController extends Controller
             'data'    => $reservation,
         ], 201);
     }
+
+    public function myReservations(Request $request)
+    {
+        $list = Reservation::with('book')
+            ->where('user_id', $request->user()->id)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $list,
+        ], 200);
+    }
 }
