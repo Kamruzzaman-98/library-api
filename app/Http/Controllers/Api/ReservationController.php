@@ -81,4 +81,17 @@ class ReservationController extends Controller
             'message' => 'রিজার্ভেশন বাতিল করা হয়েছে।',
         ], 200);
     }
+
+    public function adminIndex()
+    {
+        $reservations = Reservation::with(['user', 'book'])
+            ->whereIn('status', ['waiting', 'notified'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $reservations,
+        ], 200);
+    }
 }
