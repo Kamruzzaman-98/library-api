@@ -45,6 +45,11 @@ class BorrowController extends Controller
             'status'  => 'pending',
         ]);
 
+        Reservation::where('user_id', $request->user()->id)
+            ->where('book_id', $book->id)
+            ->whereIn('status', ['waiting', 'notified'])
+            ->update(['status' => 'fulfilled']);
+
         return response()->json([
             'status'  => 'success',
             'message' => 'বইটির জন্য আপনার আবেদন সফলভাবে জমা হয়েছে। পাঠাগার থেকে বই সংগ্রহ করুন।',
