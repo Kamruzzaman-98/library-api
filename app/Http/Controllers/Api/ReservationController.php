@@ -7,6 +7,7 @@ use App\Models\Book;
 use App\Models\BorrowRecord;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReservationController extends Controller
 {
@@ -92,6 +93,37 @@ class ReservationController extends Controller
         return response()->json([
             'status' => 'success',
             'data'   => $reservations,
+        ], 200);
+    }
+
+    public function fulfillAndIssue(Request $request, Reservation $reservation)
+    {
+        $book = Book::findOrFail($reservation->book_id);
+
+        if ($book->available_copies < 1) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'বইটির কোনো কপি বর্তমানে শেলফে মজুদ নেই!',
+            ], 400);
+        }
+
+        DB::transaction(function () use ($reservation, $book) {
+            $book->decrement('available_copies');
+
+            BorrowRecord::create([
+                'user_id'    => $reservation->user_id,
+                'book_id'    => $reservation->book_id,
+                'issue_date' => now(),
+                'due_date'   => now()->addDays(14),
+                'status'     => 'issued',
+            ]);
+
+            $reservation->update(['status' => 'fulfilled']);
+        });
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'রিজার্ভেশন সম্পন্ন করে পাঠকের নামে বইটি ইস্যু করা হয়েছে!',
         ], 200);
     }
 }
