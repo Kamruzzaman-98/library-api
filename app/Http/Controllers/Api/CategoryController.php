@@ -33,6 +33,25 @@ class CategoryController extends Controller
         ], 201);
     }
 
+
+    public function update(Request $request, Category $category)
+    {
+        $validated = $request->validate([
+            'name'        => 'required|string|max:100|unique:categories,name,' . $category->id,
+            'description' => 'nullable|string',
+        ]);
+
+        $validated['slug'] = Str::slug($validated['name']);
+
+        $category->update($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Category updated successfully!',
+            'data'    => $category,
+        ], 200);
+    }
+
     public function destroy(Category $category)
     {
         $category->delete();
