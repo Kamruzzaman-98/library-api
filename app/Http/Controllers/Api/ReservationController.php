@@ -67,4 +67,18 @@ class ReservationController extends Controller
             'data'   => $list,
         ], 200);
     }
+
+    public function cancel(Request $request, Reservation $reservation)
+    {
+        if ($reservation->user_id !== $request->user()->id) {
+            return response()->json(['status' => 'error', 'message' => 'অনুমতি নেই।'], 403);
+        }
+
+        $reservation->update(['status' => 'cancelled']);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'রিজার্ভেশন বাতিল করা হয়েছে।',
+        ], 200);
+    }
 }

@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/borrow-request', [BorrowController::class, 'requestBook']);
     Route::post('/reservations', [ReservationController::class, 'store']);
     Route::get('/my-reservations', [ReservationController::class, 'myReservations']);
+    Route::post('/reservations/cancel/{reservation}', [ReservationController::class, 'cancel']);
     Route::get('/my-borrows', [BorrowController::class, 'myBorrows']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
