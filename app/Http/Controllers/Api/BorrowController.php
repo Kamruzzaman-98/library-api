@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\BorrowRecord;
+use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -126,18 +127,37 @@ class BorrowController extends Controller
             ], 400);
         }
 
-        DB::transaction(function () use ($borrowRecord) {
+        $notifiedUser = null;
+
+        DB::transaction(function () use ($borrowRecord, &$notifiedUser) {
+
             Book::where('id', $borrowRecord->book_id)->increment('available_copies');
 
             $borrowRecord->update([
                 'status'      => 'returned',
                 'return_date' => Carbon::now(),
             ]);
+
+            $nextInQueue = Reservation::with('user')
+                ->where('book_id', $borrowRecord->book_id)
+                ->where('status', 'waiting')
+                ->orderBy('id', 'asc')
+                ->first();
+
+            if ($nextInQueue) {
+                $nextInQueue->update(['status' => 'notified']);
+                $notifiedUser = $nextInQueue->user;
+            }
         });
+
+        $msg = 'বইটি সফলভাবে ফেরত গ্রহণ করা হয়েছে!';
+        if ($notifiedUser) {
+            $msg .= " ওয়েটিং লিস্টের ১ম পাঠক ({$notifiedUser->name})-কে নোটিফাই করা হয়েছে।";
+        }
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'বইটি সফলভাবে ফেরত গ্রহণ করা হয়েছে!',
+            'message' => $msg,
         ], 200);
     }
 
