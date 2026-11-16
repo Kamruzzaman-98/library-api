@@ -35,4 +35,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(BorrowRecord::class);
     }
+
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            if (!$user->member_code) {
+                $year = date('Y');
+                $user->member_code = 'LIB-' . $year . '-' . str_pad($user->id, 4, '0', STR_PAD_LEFT);
+                $user->saveQuietly();
+            }
+        });
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
 }
