@@ -55,4 +55,25 @@ class CommunityController extends Controller
         $donations = Donation::latest()->get();
         return response()->json(['status' => 'success', 'data' => $donations], 200);
     }
+
+    public function storeDonation(Request $request)
+    {
+        $validated = $request->validate([
+            'donor_name'        => 'required|string|max:255',
+            'phone'             => 'nullable|string|max:20',
+            'address'           => 'nullable|string|max:255',
+            'donation_type'     => 'required|in:book,money',
+            'amount_or_details' => 'required|string|max:255',
+            'message'           => 'nullable|string|max:500',
+        ]);
+
+        $validated['status'] = 'approved';
+        $donation = Donation::create($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'দাতা সদস্যের তথ্য Donors Wall-এ যুক্ত হয়েছে!',
+            'data'    => $donation,
+        ], 201);
+    }
 }

@@ -60,4 +60,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/admin/members/toggle-status/{user}', [DashboardController::class, 'toggleMemberStatus']);
 
     Route::get('/donations', [CommunityController::class, 'adminDonations']);
+    Route::post('/donations', [CommunityController::class, 'storeDonation']);
 });
