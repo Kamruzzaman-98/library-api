@@ -25,6 +25,7 @@ Route::get('/books/{book}', [BookController::class, 'show']);
 Route::get('/notices', [NoticeController::class, 'index']);
 
 Route::get('/community', [CommunityController::class, 'publicData']);
+Route::post('/donations', [CommunityController::class, 'submitDonation']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
