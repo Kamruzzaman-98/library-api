@@ -117,6 +117,35 @@ class CommunityController extends Controller
         ], 201);
     }
 
+    public function updateCommittee(Request $request, CommitteeMember $committeeMember)
+    {
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'designation'   => 'required|string|max:255',
+            'phone'         => 'nullable|string|max:25',
+            'session_year'  => 'nullable|string|max:50',
+            'display_order' => 'nullable|integer|min:1',
+            'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            if ($committeeMember->photo) {
+                $oldPath = str_replace('/storage/', '', $committeeMember->photo);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $path = $request->file('photo')->store('committee', 'public');
+            $validated['photo'] = Storage::url($path);
+        }
+
+        $committeeMember->update($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'সদস্যের তথ্য সফলভাবে আপডেট হয়েছে!',
+            'data'    => $committeeMember,
+        ], 200);
+    }
+
     public function destroyCommittee(CommitteeMember $committeeMember)
     {
         if ($committeeMember->photo) {
