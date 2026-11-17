@@ -65,4 +65,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::delete('/donations/{donation}', [CommunityController::class, 'destroyDonation']);
 
     Route::post('/committee', [CommunityController::class, 'storeCommittee']);
+    Route::delete('/committee/{committeeMember}', [CommunityController::class, 'destroyCommittee']);
 });

@@ -116,4 +116,15 @@ class CommunityController extends Controller
             'data'    => $member,
         ], 201);
     }
+
+    public function destroyCommittee(CommitteeMember $committeeMember)
+    {
+        if ($committeeMember->photo) {
+            $oldPath = str_replace('/storage/', '', $committeeMember->photo);
+            Storage::disk('public')->delete($oldPath);
+        }
+        $committeeMember->delete();
+
+        return response()->json(['status' => 'success', 'message' => 'সদস্যের তথ্য মুছে ফেলা হয়েছে!'], 200);
+    }
 }
