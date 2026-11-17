@@ -49,4 +49,10 @@ class CommunityController extends Controller
             'data'    => $donation,
         ], 201);
     }
+
+    public function adminDonations()
+    {
+        $donations = Donation::latest()->get();
+        return response()->json(['status' => 'success', 'data' => $donations], 200);
+    }
 }
