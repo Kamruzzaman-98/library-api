@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\BorrowController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CommunityController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\ReservationController;
@@ -22,6 +23,8 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/{book}', [BookController::class, 'show']);
 Route::get('/notices', [NoticeController::class, 'index']);
+
+Route::get('/community', [CommunityController::class, 'publicData']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
