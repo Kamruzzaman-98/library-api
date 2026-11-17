@@ -85,4 +85,10 @@ class CommunityController extends Controller
             'message' => 'অনুদানটি অনুমোদিত হয়েছে এবং হোমপেজে প্রদর্শিত হবে!',
         ], 200);
     }
+
+    public function destroyDonation(Donation $donation)
+    {
+        $donation->delete();
+        return response()->json(['status' => 'success', 'message' => 'অনুদান রেকর্ড মুছে ফেলা হয়েছে!'], 200);
+    }
 }

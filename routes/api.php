@@ -62,4 +62,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/donations', [CommunityController::class, 'adminDonations']);
     Route::post('/donations', [CommunityController::class, 'storeDonation']);
     Route::post('/donations/approve/{donation}', [CommunityController::class, 'approveDonation']);
+    Route::delete('/donations/{donation}', [CommunityController::class, 'destroyDonation']);
 });
