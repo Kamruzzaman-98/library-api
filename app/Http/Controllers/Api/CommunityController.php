@@ -33,11 +33,15 @@ class CommunityController extends Controller
     {
         $validated = $request->validate([
             'donor_name'        => 'required|string|max:255',
-            'phone'             => 'required|string|max:20',
+            'phone'             => 'required|string|max:25',
             'address'           => 'nullable|string|max:255',
             'donation_type'     => 'required|in:book,money',
             'amount_or_details' => 'required|string|max:255',
             'message'           => 'nullable|string|max:500',
+        ], [
+            'donor_name.required'        => 'আপনার নাম আবশ্যক।',
+            'phone.required'             => 'মোবাইল নম্বর আবশ্যক।',
+            'amount_or_details.required' => 'অনুদানের পরিমাণ বা বইয়ের বিবরণ লিখুন।',
         ]);
 
         $validated['status'] = 'pending';
@@ -45,7 +49,7 @@ class CommunityController extends Controller
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'আপনার অনুদানের আগ্রহ সফলভাবে জমা হয়েছে! পাঠাগার কর্তৃপক্ষ শীঘ্রই যোগাযোগ করবে।',
+            'message' => 'আপনার অনুদানের আবেদন সফলভাবে জমা হয়েছে! অ্যাডমিন অনুমোদনের পর তা Donors Wall-এ প্রকাশিত হবে।',
             'data'    => $donation,
         ], 201);
     }
@@ -53,14 +57,17 @@ class CommunityController extends Controller
     public function adminDonations()
     {
         $donations = Donation::latest()->get();
-        return response()->json(['status' => 'success', 'data' => $donations], 200);
+        return response()->json([
+            'status' => 'success',
+            'data'   => $donations,
+        ], 200);
     }
 
     public function storeDonation(Request $request)
     {
         $validated = $request->validate([
             'donor_name'        => 'required|string|max:255',
-            'phone'             => 'nullable|string|max:20',
+            'phone'             => 'nullable|string|max:25',
             'address'           => 'nullable|string|max:255',
             'donation_type'     => 'required|in:book,money',
             'amount_or_details' => 'required|string|max:255',
@@ -80,6 +87,7 @@ class CommunityController extends Controller
     public function approveDonation(Donation $donation)
     {
         $donation->update(['status' => 'approved']);
+
         return response()->json([
             'status'  => 'success',
             'message' => 'অনুদানটি অনুমোদিত হয়েছে এবং হোমপেজে প্রদর্শিত হবে!',
@@ -89,7 +97,11 @@ class CommunityController extends Controller
     public function destroyDonation(Donation $donation)
     {
         $donation->delete();
-        return response()->json(['status' => 'success', 'message' => 'অনুদান রেকর্ড মুছে ফেলা হয়েছে!'], 200);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'অনুদান রেকর্ড মুছে ফেলা হয়েছে!',
+        ], 200);
     }
 
     public function storeCommittee(Request $request)
@@ -97,7 +109,7 @@ class CommunityController extends Controller
         $validated = $request->validate([
             'name'          => 'required|string|max:255',
             'designation'   => 'required|string|max:255',
-            'phone'         => 'nullable|string|max:20',
+            'phone'         => 'nullable|string|max:25',
             'session_year'  => 'nullable|string|max:50',
             'display_order' => 'nullable|integer|min:1',
             'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -154,6 +166,9 @@ class CommunityController extends Controller
         }
         $committeeMember->delete();
 
-        return response()->json(['status' => 'success', 'message' => 'সদস্যের তথ্য মুছে ফেলা হয়েছে!'], 200);
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'সদস্যের তথ্য মুছে ফেলা হয়েছে!',
+        ], 200);
     }
 }
