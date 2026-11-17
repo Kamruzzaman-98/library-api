@@ -91,4 +91,29 @@ class CommunityController extends Controller
         $donation->delete();
         return response()->json(['status' => 'success', 'message' => 'অনুদান রেকর্ড মুছে ফেলা হয়েছে!'], 200);
     }
+
+    public function storeCommittee(Request $request)
+    {
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'designation'   => 'required|string|max:255',
+            'phone'         => 'nullable|string|max:20',
+            'session_year'  => 'nullable|string|max:50',
+            'display_order' => 'nullable|integer|min:1',
+            'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('committee', 'public');
+            $validated['photo'] = Storage::url($path);
+        }
+
+        $member = CommitteeMember::create($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'পরিচালনা পর্ষদের সদস্য যুক্ত করা হয়েছে!',
+            'data'    => $member,
+        ], 201);
+    }
 }
