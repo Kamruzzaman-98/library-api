@@ -76,4 +76,13 @@ class CommunityController extends Controller
             'data'    => $donation,
         ], 201);
     }
+
+    public function approveDonation(Donation $donation)
+    {
+        $donation->update(['status' => 'approved']);
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'অনুদানটি অনুমোদিত হয়েছে এবং হোমপেজে প্রদর্শিত হবে!',
+        ], 200);
+    }
 }
