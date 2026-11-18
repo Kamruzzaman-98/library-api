@@ -9,59 +9,91 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\SettingController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('/settings', [SettingController::class, 'index']);
+/*
+|--------------------------------------------------------------------------
+| ১. পাবলিক রুটস (লগইন ছাড়া সবাই ভিজিট ও ব্যবহার করতে পারবে)
+|--------------------------------------------------------------------------
+*/
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// পাঠাগারের সাধারণ তথ্য, বই ও ক্যাটাগরি
+Route::get('/settings', [SettingController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);
-
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/{book}', [BookController::class, 'show']);
-Route::get('/notices', [NoticeController::class, 'index']);
 
+// পাবলিক নোটিশ, দাতা তালিকা ও কমিটি
+Route::get('/notices', [NoticeController::class, 'index']);
 Route::get('/community', [CommunityController::class, 'publicData']);
+
+// পাবলিক ও রিডার অনুদান আবেদন (লগইন ছাড়া ও লগইন সহ সবাই সাবমিট করতে পারবে)
 Route::post('/donations', [CommunityController::class, 'submitDonation']);
 
+/*
+|--------------------------------------------------------------------------
+| ২. অথেন্টিকেটেড ইউজার রুটস (লগইন করা রিডার ও অ্যাডমিন উভয়ের জন্য)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // পাঠকের বই আবেদন ও নিজের হিস্ট্রি
     Route::post('/borrow-request', [BorrowController::class, 'requestBook']);
+    Route::get('/my-borrows', [BorrowController::class, 'myBorrows']);
+
+    // পাঠকের বই রিজার্ভেশন / ওয়েটিং লিস্ট
     Route::post('/reservations', [ReservationController::class, 'store']);
     Route::get('/my-reservations', [ReservationController::class, 'myReservations']);
-    Route::post('/reservations/cancel/{reservation}', [ReservationController::class, 'cancel']);
-    Route::get('/my-borrows', [BorrowController::class, 'myBorrows']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
 });
 
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+/*
+|--------------------------------------------------------------------------
+| ৩. অ্যাডমিন প্রটেক্টেড রুটস (সব রুটের শুরুতে স্বয়ংক্রিয়ভাবে /api/admin/ বসবে)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    // ড্যাশবোর্ড অ্যানালিটিক্স ও মেম্বার ম্যানেজমেন্ট
+    Route::get('/stats', [DashboardController::class, 'stats']);
+    Route::get('/members', [DashboardController::class, 'members']);
+    Route::post('/members/{user}/toggle-status', [DashboardController::class, 'toggleMemberStatus']);
+
+    // পাঠাগার সেটিংস আপডেট
     Route::post('/settings', [SettingController::class, 'update']);
+
+    // ক্যাটাগরি CRUD
     Route::post('/categories', [CategoryController::class, 'store']);
-    Route::post('/categories/{category}', [CategoryController::class, 'update']);
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+
+    // বই CRUD (ছবি আপলোড সাপোর্টের জন্য POST দিয়ে আপডেট)
     Route::post('/books', [BookController::class, 'store']);
     Route::post('/books/{book}', [BookController::class, 'update']);
     Route::delete('/books/{book}', [BookController::class, 'destroy']);
-    Route::get('/reservations', [ReservationController::class, 'adminIndex']);
-    Route::post('/reservations/issue/{reservation}', [ReservationController::class, 'fulfillAndIssue']);
+
+    // বই ইস্যু, রিটার্ন ও রিকোয়েস্ট ম্যানেজমেন্ট
     Route::get('/borrows', [BorrowController::class, 'adminBorrows']);
-    Route::post('/borrows/issue/{borrowRecord}', [BorrowController::class, 'issueBook']);
-    Route::post('/borrows/return/{borrowRecord}', [BorrowController::class, 'returnBook']);
-    Route::post('/borrows/reject/{borrowRecord}', [BorrowController::class, 'rejectRequest']);
-    Route::get('/manage/notices', [NoticeController::class, 'adminIndex']);
+    Route::post('/borrows/{borrowRecord}/issue', [BorrowController::class, 'issueBook']);
+    Route::post('/borrows/{borrowRecord}/return', [BorrowController::class, 'returnBook']);
+    Route::post('/borrows/{borrowRecord}/reject', [BorrowController::class, 'rejectRequest']);
+
+    // অ্যাডমিন ওয়েটিং লিস্ট (Reservations)
+    Route::get('/reservations', [ReservationController::class, 'adminIndex']);
+    Route::post('/reservations/{reservation}/issue', [ReservationController::class, 'fulfillAndIssue']);
+
+    // নোটিশ বোর্ড ম্যানেজমেন্ট
+    Route::get('/notices', [NoticeController::class, 'adminIndex']);
     Route::post('/notices', [NoticeController::class, 'store']);
     Route::delete('/notices/{notice}', [NoticeController::class, 'destroy']);
 
-    Route::get('/admin/stats', [DashboardController::class, 'stats']);
-    Route::get('/admin/members', [DashboardController::class, 'members']);
-    Route::post('/admin/members/toggle-status/{user}', [DashboardController::class, 'toggleMemberStatus']);
-
+    // অনুদান (Donors) ও পরিচালনা পর্ষদ (Committee) ম্যানেজমেন্ট
     Route::get('/donations', [CommunityController::class, 'adminDonations']);
     Route::post('/donations', [CommunityController::class, 'storeDonation']);
-    Route::post('/donations/approve/{donation}', [CommunityController::class, 'approveDonation']);
+    Route::post('/donations/{donation}/approve', [CommunityController::class, 'approveDonation']);
     Route::delete('/donations/{donation}', [CommunityController::class, 'destroyDonation']);
 
     Route::post('/committee', [CommunityController::class, 'storeCommittee']);
