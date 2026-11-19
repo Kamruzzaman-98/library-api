@@ -115,6 +115,16 @@ class CommunityController extends Controller
         ], 200);
     }
 
+    public function rejectDonation(Donation $donation)
+    {
+        $donation->update(['status' => 'rejected']);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'অনুদান আবেদনটি বাতিল করা হয়েছে।',
+        ], 200);
+    }
+
     public function destroyDonation(Donation $donation)
     {
         $donation->delete();
