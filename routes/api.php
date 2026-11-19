@@ -94,6 +94,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/donations', [CommunityController::class, 'adminDonations']);
     Route::post('/donations', [CommunityController::class, 'storeDonation']);
     Route::post('/donations/{donation}/approve', [CommunityController::class, 'approveDonation']);
+    Route::put('/donations/{donation}', [CommunityController::class, 'updateDonation']);
+    Route::post('/donations/{donation}/reject', [CommunityController::class, 'rejectDonation']);
     Route::delete('/donations/{donation}', [CommunityController::class, 'destroyDonation']);
 
     Route::post('/committee', [CommunityController::class, 'storeCommittee']);

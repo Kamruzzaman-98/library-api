@@ -84,6 +84,27 @@ class CommunityController extends Controller
         ], 201);
     }
 
+    public function updateDonation(Request $request, Donation $donation)
+    {
+        $validated = $request->validate([
+            'donor_name'        => 'required|string|max:255',
+            'phone'             => 'nullable|string|max:25',
+            'address'           => 'nullable|string|max:255',
+            'donation_type'     => 'required|in:book,money',
+            'amount_or_details' => 'required|string|max:255',
+            'message'           => 'nullable|string|max:500',
+            'status'            => 'required|in:pending,approved,rejected',
+        ]);
+
+        $donation->update($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'অনুদানের তথ্য সফলভাবে আপডেট হয়েছে!',
+            'data'    => $donation,
+        ], 200);
+    }
+
     public function approveDonation(Donation $donation)
     {
         $donation->update(['status' => 'approved']);
