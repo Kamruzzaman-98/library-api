@@ -31,4 +31,9 @@ class Book extends Model
     {
         return $this->hasMany(BorrowRecord::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(BookReview::class);
+    }
 }
