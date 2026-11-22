@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookController;
+use App\Http\Controllers\Api\BookReviewController;
 use App\Http\Controllers\Api\BorrowController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CommunityController;
@@ -25,6 +26,7 @@ Route::get('/settings', [SettingController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/{book}', [BookController::class, 'show']);
+Route::get('/books/{book}/reviews', [BookReviewController::class, 'index']);
 
 // পাবলিক নোটিশ, দাতা তালিকা ও কমিটি
 Route::get('/notices', [NoticeController::class, 'index']);
@@ -45,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // পাঠকের বই আবেদন ও নিজের হিস্ট্রি
     Route::post('/borrow-request', [BorrowController::class, 'requestBook']);
     Route::get('/my-borrows', [BorrowController::class, 'myBorrows']);
+    Route::post('/reviews', [BookReviewController::class, 'store']);
 
     // পাঠকের বই রিজার্ভেশন / ওয়েটিং লিস্ট
     Route::post('/reservations', [ReservationController::class, 'store']);
