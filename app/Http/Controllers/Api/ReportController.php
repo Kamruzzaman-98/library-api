@@ -56,4 +56,60 @@ class ReportController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    public function exportBorrows(Request $request)
+    {
+        $query = BorrowRecord::with(['user', 'book'])->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $records = $query->get();
+        $fileName = 'library_circulation_report_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"$fileName\"",
+        ];
+
+        $callback = function () use ($records) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, [
+                'রেকর্ড ID',
+                'মেম্বার ID',
+                'পাঠকের নাম',
+                'মোবাইল নম্বর',
+                'বইয়ের নাম',
+                'ইস্যুর তারিখ',
+                'ফেরতের শেষ তারিখ',
+                'ফেরত প্রদানের তারিখ',
+                'বিলম্ব (দিন)',
+                'জরিমানা (টাকা)',
+                'অবস্থা',
+            ]);
+
+            foreach ($records as $rec) {
+                fputcsv($file, [
+                    $rec->id,
+                    $rec->user?->member_code ?? 'N/A',
+                    $rec->user?->name ?? 'N/A',
+                    $rec->user?->phone ?? 'N/A',
+                    $rec->book?->title ?? 'N/A',
+                    $rec->issue_date ?? '---',
+                    $rec->due_date ?? '---',
+                    $rec->return_date ?? '---',
+                    $rec->overdue_days,
+                    $rec->fine_amount,
+                    strtoupper($rec->status),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

@@ -108,4 +108,5 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::delete('/committee/{committeeMember}', [CommunityController::class, 'destroyCommittee']);
 
     Route::get('/reports/books', [ReportController::class, 'exportBooks']);
+    Route::get('/reports/borrows', [ReportController::class, 'exportBorrows']);
 });
