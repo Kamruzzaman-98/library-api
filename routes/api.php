@@ -83,6 +83,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/borrows/{borrowRecord}/issue', [BorrowController::class, 'issueBook']);
     Route::post('/borrows/{borrowRecord}/return', [BorrowController::class, 'returnBook']);
     Route::post('/borrows/{borrowRecord}/reject', [BorrowController::class, 'rejectRequest']);
+    Route::post('/borrows/direct-issue', [BorrowController::class, 'directIssue']);
 
     // অ্যাডমিন ওয়েটিং লিস্ট (Reservations)
     Route::get('/reservations', [ReservationController::class, 'adminIndex']);

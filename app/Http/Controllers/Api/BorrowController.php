@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\BorrowRecord;
 use App\Models\Reservation;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -181,5 +182,68 @@ class BorrowController extends Controller
             'status'  => 'success',
             'message' => 'বইয়ের আবেদনটি বাতিল করা হয়েছে।',
         ], 200);
+    }
+
+    public function directIssue(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'book_id' => 'required|exists:books,id',
+            'days'    => 'nullable|integer|min:1|max:60',
+        ]);
+
+        $user = User::findOrFail($validated['user_id']);
+        if ($user->status !== 'active') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'এই পাঠকের অ্যাকাউন্টটি বর্তমানে স্থগিত (Blocked) রয়েছে!',
+            ], 403);
+        }
+
+        $book = Book::findOrFail($validated['book_id']);
+        if ($book->available_copies < 1) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'দুঃখিত, এই বইটির কোনো কপি বর্তমানে শেলফে মজুদ নেই!',
+            ], 400);
+        }
+
+        $alreadyHasBook = BorrowRecord::where('user_id', $user->id)
+            ->where('book_id', $book->id)
+            ->whereIn('status', ['pending', 'issued'])
+            ->exists();
+
+        if ($alreadyHasBook) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'এই বইটি ইতোমধ্যে উক্ত পাঠকের নামে ইস্যু করা বা আবেদনকৃত আছে।',
+            ], 400);
+        }
+
+        $days = $validated['days'] ?? 14;
+        $record = null;
+
+        DB::transaction(function () use ($user, $book, $days, &$record) {
+            $book->decrement('available_copies');
+
+            $record = BorrowRecord::create([
+                'user_id'    => $user->id,
+                'book_id'    => $book->id,
+                'issue_date' => Carbon::now(),
+                'due_date'   => Carbon::now()->addDays($days),
+                'status'     => 'issued',
+            ]);
+
+            Reservation::where('user_id', $user->id)
+                ->where('book_id', $book->id)
+                ->whereIn('status', ['waiting', 'notified'])
+                ->update(['status' => 'fulfilled']);
+        });
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => "{$user->name} ({$user->member_code})-এর নামে বইটি সফলভাবে ইস্যু করা হয়েছে!",
+            'data'    => $record->load(['user', 'book']),
+        ], 201);
     }
 }
