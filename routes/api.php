@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CommunityController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\NoticeController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\SettingController;
 use Illuminate\Support\Facades\Route;
@@ -105,4 +106,6 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/committee', [CommunityController::class, 'storeCommittee']);
     Route::post('/committee/{committeeMember}', [CommunityController::class, 'updateCommittee']);
     Route::delete('/committee/{committeeMember}', [CommunityController::class, 'destroyCommittee']);
+
+    Route::get('/reports/books', [ReportController::class, 'exportBooks']);
 });
