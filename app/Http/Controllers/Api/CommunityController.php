@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Book;
 use App\Models\CommitteeMember;
 use App\Models\Donation;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,11 +22,29 @@ class CommunityController extends Controller
             ->orderBy('id', 'asc')
             ->get();
 
+        $newArrivals = Book::with('category')
+            ->withAvg('reviews', 'rating')
+            ->latest()
+            ->take(6)
+            ->get();
+
+        $topReaders = User::where('role', 'reader')
+            ->where('status', 'active')
+            ->withCount(['borrowRecords as returned_books_count' => function ($query) {
+                $query->where('status', 'returned');
+            }])
+            ->having('returned_books_count', '>', 0)
+            ->orderByDesc('returned_books_count')
+            ->take(3)
+            ->get(['id', 'member_code', 'name', 'address']);
+
         return response()->json([
             'status' => 'success',
             'data'   => [
-                'donors'    => $donors,
-                'committee' => $committee,
+                'donors'       => $donors,
+                'committee'    => $committee,
+                'new_arrivals' => $newArrivals,
+                'top_readers'  => $topReaders,
             ],
         ], 200);
     }
