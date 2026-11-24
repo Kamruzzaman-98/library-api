@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -49,6 +50,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/borrow-request', [BorrowController::class, 'requestBook']);
     Route::get('/my-borrows', [BorrowController::class, 'myBorrows']);
     Route::post('/reviews', [BookReviewController::class, 'store']);
+
+    Route::get('/my-wishlist', [WishlistController::class, 'index']);
+    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle']);
 
     // পাঠকের বই রিজার্ভেশন / ওয়েটিং লিস্ট
     Route::post('/reservations', [ReservationController::class, 'store']);
