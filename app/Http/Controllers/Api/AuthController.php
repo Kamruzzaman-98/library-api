@@ -102,6 +102,37 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function changePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'new_password'     => 'required|string|min:6|confirmed',
+        ], [
+            'current_password.required' => 'বর্তমান পাসওয়ার্ড লিখুন।',
+            'new_password.required'     => 'নতুন পাসওয়ার্ড লিখুন।',
+            'new_password.min'          => 'নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
+            'new_password.confirmed'    => 'নতুন পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মিলছে না।',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'আপনার বর্তমান পাসওয়ার্ডটি সঠিক নয়!',
+            ], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($validated['new_password']),
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!',
+        ], 200);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
