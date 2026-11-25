@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -70,6 +71,34 @@ class AuthController extends Controller
             'message' => 'Login successful!',
             'token'   => $token,
             'user'    => $user,
+        ], 200);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name'    => 'required|string|max:255',
+            'phone'   => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('users', 'phone')->ignore($user->id),
+            ],
+            'address' => 'nullable|string|max:255',
+        ], [
+            'name.required'  => 'নাম প্রদান করা আবশ্যক।',
+            'phone.required' => 'মোবাইল নম্বর প্রদান করা আবশ্যক।',
+            'phone.unique'   => 'এই মোবাইল নম্বরটি ইতোমধ্যে অন্য অ্যাকাউন্টে ব্যবহৃত হচ্ছে।',
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'আপনার প্রোফাইল তথ্য সফলভাবে আপডেট হয়েছে!',
+            'user'    => $user->fresh(),
         ], 200);
     }
 

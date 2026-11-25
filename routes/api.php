@@ -44,6 +44,8 @@ Route::post('/donations', [CommunityController::class, 'submitDonation']);
 */
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/change-password', [AuthController::class, 'changePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // পাঠকের বই আবেদন ও নিজের হিস্ট্রি
